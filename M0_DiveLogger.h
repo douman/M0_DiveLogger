@@ -15,7 +15,7 @@
 #define BAT_AVG_CNT 4
 #define BLEMOD 20
 #define GPSmillis 1000
-#define NINEDoFmillis 1000
+#define NINEDoFmillis 2000
 // #define DEBUG
 
 // Define pins for M0 Feather BLE DiverLogger
@@ -35,6 +35,8 @@
 
 // Globals for the M0_Feather_GPS sketch
 
+const float pi = 3.149265;
+const float m_p_sec_fac = 0.514444;
 long log_cnt=0;
 unsigned long lastGPSmillis = 0, lastNINEDoFmillis = 0, serprt_millis = 0;
 byte cksum, savecksum;
@@ -44,4 +46,4 @@ float batt_volts;
 volatile unsigned long rtc_sec_cnt=0, rtc_32768_cnt=0, rtc_latest_micro; // rtc timing globals
 boolean bleprt = false, serprt=true, wrt_ble = false;
 volatile boolean new_sec = false;
-
+float x_sum = 0, y_sum = 0, z_sum = 0;

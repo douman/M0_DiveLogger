@@ -1,5 +1,5 @@
 #include "M0_DiveLogger.h"
-const char *version="M0_DiveLogger -> V1.7-20160920 ";
+const char *version="M0_DiveLogger -> V2.0-20161104 ";
 
 // These are for bluefruit
 #define FACTORYRESET_ENABLE         1
@@ -218,12 +218,35 @@ float read_batt()
   return(val);
 }
 
+int printXY()
+{
+  if(serprt)
+  {
+    String out = String(OUT_SIZE); // string for building the outptu string for GPS
+    // Format and print the x, y integrated coords
+    
+    out = String(log_cnt++) + "\txyz\t" + String(x_sum) + "\t" + String(y_sum);
+    if(serprt)
+    {
+      if(serprt) Serial.println(out);
+    }
+    if(wrt_ble && (ppscnt % BLEMOD == 0 && ppscnt > 10))
+    {
+      bleprt=true;
+      ble.println(out);
+    }
+  }
+}
 int gpsProcess()
 {
-  String out = String(OUT_SIZE); // string for building the outptu string for GPS
+  String out = String(OUT_SIZE); // string for building the output string for GPS
   lastGPSmillis = millis();
   batt_volts = read_batt();
   char *sentence = myGPS.lastNMEA();
+  float courserad = pi * myGPS.angle/180.0;
+  float speedm_p_sec = myGPS.speed * m_p_sec_fac;
+  x_sum = x_sum + speedm_p_sec * sin(courserad);
+  y_sum = y_sum + speedm_p_sec * cos(courserad);
   if(serprt) {Serial.print("# "); Serial.println((sentence+1)); }
   if(serprt)
     {
@@ -363,7 +386,11 @@ void loop()
   // Process GPS
   char *sentence = myGPS.lastNMEA();
   boolean gpsGo = /* myGPS.newNMEAreceived() && */ (lastGPSmillis + GPSmillis < millis()) && (sentence[4] == 'R');
-  if (gpsGo) gpsProcess();
+  if (gpsGo) 
+  {
+    gpsProcess();
+    printXY();
+  }
   
   // Process 9 DoF
   boolean nineDoFGo = lastNINEDoFmillis + NINEDoFmillis < millis(); 
