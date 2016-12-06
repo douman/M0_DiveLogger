@@ -363,7 +363,7 @@ void loop()
     }
   }
 /*  
-  Figure out logic to turn on BLE output from monitoring BLE input (previous code did not work)
+ * Figure out logic to turn on BLE output from monitoring BLE input (previous code did not work)
  */
   
   // Recalculate the 1sec microsecond correction (only for rational values of measured microseconds)
@@ -385,7 +385,7 @@ void loop()
 
   // Process GPS
   char *sentence = myGPS.lastNMEA();
-  boolean gpsGo = /* myGPS.newNMEAreceived() && */ (lastGPSmillis + GPSmillis < millis()) && (sentence[4] == 'R');
+  boolean gpsGo = /* myGPS.newNMEAreceived() && */ (lastGPSmillis + GPSmillis < millis()) && (sentence[4] == 'R'); // Messing with this compare drm 20161204
   if (gpsGo) 
   {
     gpsProcess();
