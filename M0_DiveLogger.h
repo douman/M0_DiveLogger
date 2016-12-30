@@ -47,3 +47,6 @@ volatile unsigned long rtc_sec_cnt=0, rtc_32768_cnt=0, rtc_latest_micro; // rtc 
 boolean bleprt = false, serprt=true, wrt_ble = false;
 volatile boolean new_sec = false;
 float x_sum = 0, y_sum = 0, z_sum = 0;
+
+// Prototypes for various application functions
+int Output_9DoF();

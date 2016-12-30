@@ -148,15 +148,15 @@ void setup()
 }
 
 // Read the IMU sensor
+#include "M0_Output_Procs.h"
+
 void nineDoFProcess(void)
 {
   lastNINEDoFmillis = millis();
   digitalWrite(LED, HIGH);
-  sensors_event_t accel, mag, gyro, temp; // all local, no global knowledge of 9 DoF
-  my9DOF.getEvent(&accel, &mag, &gyro, &temp); 
+  Output_9DoF();
   digitalWrite(LED, LOW);
-
-  // Write the data
+/*  // Write the data
   String out = String(OUT_SIZE);
 
   out = String(log_cnt++) + "\tacl\t" + String(accel.acceleration.x, 2) + "\t" + 
@@ -178,6 +178,7 @@ void nineDoFProcess(void)
                                                     mag.magnetic.y * mag.magnetic.y + 
                                                     mag.magnetic.z * mag.magnetic.z), 2);
   if(serprt) Serial.println(out);
+ */
 }
 
 // print out the SAMD processor serial number
