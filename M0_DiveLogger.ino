@@ -1,5 +1,4 @@
 #include "M0_DiveLogger.h"
-const char *version="M0_DiveLogger -> V2.0-20161104 ";
 
 // These are for bluefruit
 #define FACTORYRESET_ENABLE         1
@@ -22,6 +21,7 @@ const char *version="M0_DiveLogger -> V2.0-20161104 ";
  *  V1.5 by drm 20160720 preparing for RTC integration
  *  V1.6 by drm 20160726 refactored and seperated GPS and 9DOF
  *  V1.7 by drm 20160920 minor tweeks, thinking about WiFi Feather M0
+ *  V2.1 by drm 20170104 minor refactoring
  */
 
 Adafruit_GPS myGPS(&Serial1);                  // Ultimate GPS FeatherWing
@@ -49,14 +49,18 @@ void rtc_32768_int()
   rtc_32768_cnt++;
 }
 
-// A small helper -- ADAFRUIT
-void error(const __FlashStringHelper*err)
+// A small helper -- ADAFRUIT (not much help, drm)
+void adaError(const __FlashStringHelper*err)
 {
-  if(serprt) Serial.println(err);
-  while (1);
+  if(serprt)
+  {
+    Serial.print("Fatal Error-looping-> ");
+    Serial.println(err);
+    while (1);
+  }
 }
 
-int nineDoFInit()
+int initNineDoF()
 {
   /* Initialise the 9DOF sensor */
   if(!my9DOF.begin())
@@ -75,12 +79,12 @@ int nineDoFInit()
   return(ST_AOK);  
 }
 
-int bleInit()
+int initBLE()
 {
   // Set up the Bluetooth LE
   if ( !ble.begin(VERBOSE_MODE) )
   {
-    error(F("Couldn't find Bluefruit, make sure it's in CoMmanD mode & check wiring?"));
+    adaError(F("Couldn't find Bluefruit, make sure it's in CoMmanD mode & check wiring?"));
   }
   Serial.println( F("BLE OK!"));
     if ( FACTORYRESET_ENABLE )
@@ -89,7 +93,7 @@ int bleInit()
     Serial.println(F("Performing a factory reset: "));
     if ( ! ble.factoryReset() )
     {
-      error(F("Couldn't factory reset"));
+      adaError(F("Couldn't factory reset"));
     }
   }
   ble.verbose(false);  // debug info is a little annoying after this point!
@@ -100,7 +104,7 @@ int bleInit()
   return(ST_AOK);
 }
 
-int gpsInit()
+int initGPS()
 {
   // Set up the GPS
   pinMode(GPSPPSINT, INPUT);
@@ -125,26 +129,21 @@ void setup()
 {
   Serial.begin(115200);
   delay(2000);
+  drmStartPrint(version);
    
   // initialize digital pin (LED) 13 as an output and the battery level as analog input
   analogReadResolution(12);
   pinMode(LED, OUTPUT); digitalWrite(LED, LOW);
-  pinMode(BATT, INPUT); // Battery level adc input
+  pinMode(SAMM0_BATT, INPUT); // Battery level adc input
 
   /* Initialise the 9DOF sensor */
-  nineDoFInit();
+  initNineDoF();
 
   // Set up the Bluetooth LE
-  bleInit();
+  initBLE();
 
   // Set up the GPS
-  gpsInit();
-
-  Serial.print("SerBuf0-> ");
-  Serial.println(Serial.availableForWrite());
-  drmStartPrint(version);
-  Serial.print("SerBuf1-> ");
-  Serial.println(Serial.availableForWrite());
+  initGPS();
 }
 
 // Read the IMU sensor
@@ -156,42 +155,6 @@ void nineDoFProcess(void)
   digitalWrite(LED, HIGH);
   Output_9DoF();
   digitalWrite(LED, LOW);
-/*  // Write the data
-  String out = String(OUT_SIZE);
-
-  out = String(log_cnt++) + "\tacl\t" + String(accel.acceleration.x, 2) + "\t" + 
-                                        String(accel.acceleration.y, 2) + "\t" + 
-                                        String(accel.acceleration.z, 2) + "\t" +
-                                        String(sqrt(accel.acceleration.x * accel.acceleration.x + 
-                                                    accel.acceleration.y * accel.acceleration.y + 
-                                                    accel.acceleration.z * accel.acceleration.z), 2) + "\r\n" +
-        String(log_cnt++) + "\tgyr\t" + String(gyro.gyro.x, 2) + "\t" + 
-                                        String(gyro.gyro.y, 2) + "\t" + 
-                                        String(gyro.gyro.z, 2) + "\t" +
-                                        String(sqrt(gyro.gyro.x * gyro.gyro.x + 
-                                                    gyro.gyro.y * gyro.gyro.y + 
-                                                    gyro.gyro.z * gyro.gyro.z), 2) + "\r\n" +
-        String(log_cnt++) + "\tmag\t" + String(mag.magnetic.x, 2) + "\t" + 
-                                        String(mag.magnetic.y, 2) + "\t" + 
-                                        String(mag.magnetic.z, 2) + "\t" +
-                                        String(sqrt(mag.magnetic.x * mag.magnetic.x + 
-                                                    mag.magnetic.y * mag.magnetic.y + 
-                                                    mag.magnetic.z * mag.magnetic.z), 2);
-  if(serprt) Serial.println(out);
- */
-}
-
-// print out the SAMD processor serial number
-void print_serial()
-{
-  long s[4], *ser;
-  ser = (long *) 0x0080A00C; // address of the processor serial number
-  int i;
-  for (i=3; i>=0; i--) s[i] = *ser++;
-
-  if(serprt) Serial.print("s ");
-  for(i=0; i<4; i++) if(serprt) Serial.print(s[i], HEX);
-  if(serprt) Serial.println();
 }
 
 void micro_clk_corr()
@@ -207,42 +170,11 @@ void micro_clk_corr()
   return;  
 }
 
-float read_batt()
-{
-  // Get and print Battery voltage at beginning of GPS sentence
-  float val=0;
-  int i;
-  for(i=0; i<BAT_AVG_CNT; i++) val += analogRead(BATT);
-  val = val/(float)BAT_AVG_CNT;
-  // val = (val * (2*3.3))/1024; // at lower ADC resolution (10 bit)
-  val = (val * (2*3.3))/4096; // 12 bit ADC resolution
-  return(val);
-}
-
-int printXY()
-{
-  if(serprt)
-  {
-    String out = String(OUT_SIZE); // string for building the outptu string for GPS
-    // Format and print the x, y integrated coords
-    
-    out = String(log_cnt++) + "\txyz\t" + String(x_sum) + "\t" + String(y_sum);
-    if(serprt)
-    {
-      if(serprt) Serial.println(out);
-    }
-    if(wrt_ble && (ppscnt % BLEMOD == 0 && ppscnt > 10))
-    {
-      bleprt=true;
-      ble.println(out);
-    }
-  }
-}
 int gpsProcess()
 {
   String out = String(OUT_SIZE); // string for building the output string for GPS
   lastGPSmillis = millis();
-  batt_volts = read_batt();
+  batt_volts = read_samM0_batt();
   char *sentence = myGPS.lastNMEA();
   float courserad = pi * myGPS.angle/180.0;
   float speedm_p_sec = myGPS.speed * m_p_sec_fac;
@@ -352,14 +284,6 @@ void loop()
     { 
       serprt = !serprt; 
       Serial.print("# SER swap "); 
-      if(serprt) 
-      {
-        Serial.print("# SerBuf0-> ");
-        Serial.print(Serial.availableForWrite());
-        Serial.println(" TRUE ");
-        Serial.print("# SerBuf0-> ");
-        Serial.println(Serial.availableForWrite()); 
-      }
       Serial.println(serprt); 
     }
   }
@@ -370,8 +294,8 @@ void loop()
   // Recalculate the 1sec microsecond correction (only for rational values of measured microseconds)
   micro_clk_corr();
 
-  // Print Serial number
   unsigned long temp_millis = millis();
+  // Things to do only in early cycles
   if((temp_millis < 10000) && (temp_millis - 1000 > serprt_millis)) // only early on
       {
         serprt_millis = temp_millis;
@@ -381,7 +305,8 @@ void loop()
         Serial.print("# SerBuf1-> ");
         Serial.println(Serial.availableForWrite());
         if(serprt) { Serial.print("# "); Serial.print(micro_intv); Serial.print(" "); Serial.println(ppscnt); }
-        print_serial();
+        // Print Serial number
+        print_samM0_serial();
       }
 
   // Process GPS
@@ -417,7 +342,6 @@ void loop()
   if (Serial1.available())
   {
     char c = myGPS.read();
-    
     if (c=='$') // end of a GPS sentence
     {
       // Start for Calculating sentence checksum

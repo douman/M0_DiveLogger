@@ -1,4 +1,4 @@
-
+#include "M0_DiveLogger.h"
 // Output Functions for M0_DiveLogger Project
 int Output_9DoF()
 {
@@ -30,3 +30,35 @@ int Output_9DoF()
   return(ST_AOK);
 }
 
+//// print out the SAMD processor serial number
+//void print_samM0_serial()
+//{
+//  long s[4], *ser;
+//  ser = (long *) 0x0080A00C; // address of the processor serial number
+//  int i;
+//  for (i=3; i>=0; i--) s[i] = *ser++;
+//
+//  if(serprt) Serial.print("s ");
+//  for(i=0; i<4; i++) if(serprt) Serial.print(s[i], HEX);
+//  if(serprt) Serial.println();
+//}
+
+int printXY()
+{
+  if(serprt)
+  {
+    String out = String(OUT_SIZE); // string for building the outptu string for GPS
+    // Format and print the x, y integrated coords
+    
+    out = String(log_cnt++) + "\txyz\t" + String(x_sum) + "\t" + String(y_sum);
+    if(serprt)
+    {
+      if(serprt) Serial.println(out);
+    }
+    if(wrt_ble && (ppscnt % BLEMOD == 0 && ppscnt > 10))
+    {
+      bleprt=true;
+      ble.println(out);
+    }
+  }
+}

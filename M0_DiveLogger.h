@@ -1,3 +1,6 @@
+#pragma once
+const char *version="M0_DiveLogger -> V2.1-20170104 ";
+
 #include <Adafruit_Sensor.h>
 #include <Adafruit_LSM9DS0.h>
 #include <drmLib.h>
@@ -12,7 +15,6 @@
 
 #define OUT_SIZE 160
 #define GPS_BAUD 9600 // 9600 is factory, 57600 is faster
-#define BAT_AVG_CNT 4
 #define BLEMOD 20
 #define GPSmillis 1000
 #define NINEDoFmillis 2000
@@ -20,7 +22,6 @@
 
 // Define pins for M0 Feather BLE DiverLogger
 #define LED           13
-#define BATT          A7
 #define GPSPPSINT     11
 #define ACCINT        8
 #define MICIN         A10
