@@ -299,11 +299,11 @@ void loop()
   if((temp_millis < 10000) && (temp_millis - 1000 > serprt_millis)) // only early on
       {
         serprt_millis = temp_millis;
-        Serial.print("# SerBuf0-> ");
-        Serial.println(Serial.availableForWrite());
+        // Serial.print("# SerBuf0-> ");
+        // Serial.println(Serial.availableForWrite());
         drmStartPrint(version);
-        Serial.print("# SerBuf1-> ");
-        Serial.println(Serial.availableForWrite());
+        // Serial.print("# SerBuf1-> ");
+        // Serial.println(Serial.availableForWrite());
         if(serprt) { Serial.print("# "); Serial.print(micro_intv); Serial.print(" "); Serial.println(ppscnt); }
         // Print Serial number
         print_samM0_serial();
