@@ -5,23 +5,10 @@
 #define MINIMUM_FIRMWARE_VERSION    "0.6.6"
 #define MODE_LED_BEHAVIOUR          "MODE"
 
-/* Utilitize the GPS with M0 Feather BLE
+/* Read out the GPS history memory and print it to serial output
  *  with liberal code borrowing from Adafruit
  *  
- *  V0.9 by drm 20160609
- *  V0.91 by drm 20160613 added time adjustment
- *  V0.92 by drm 20160613 got the factors for micro timing dialed in (I think)
- *  V0.93 by drm 20160616 more work on timing corrections
- *  V0.94 by drm 20160617 now using all 12 bits of ADC
- *  V1.0 by drm 20160621 cleaning up the string output and getting BLE working
- *  V1.1 by drm 20160622 serial toggles for various output (serial/BLE)
- *  V1.2 by drm 20160705 messing with output formats and sprintf for leading zeros
- *  V1.3 by drm 20160706 adjusting messages to sw design document
- *  V1.4 by drm 20160718 adding in 9 DoF sensor and update to 5 hz fix & reporting
- *  V1.5 by drm 20160720 preparing for RTC integration
- *  V1.6 by drm 20160726 refactored and seperated GPS and 9DOF
- *  V1.7 by drm 20160920 minor tweeks, thinking about WiFi Feather M0
- *  V2.1 by drm 20170104 minor refactoring
+ *  V1.0 by drm 20160609 based upon M0_DiveLogger code V2.1
  */
 
 Adafruit_GPS myGPS(&Serial1);                  // Ultimate GPS FeatherWing
@@ -37,13 +24,13 @@ void pps_int()
   ppscnt++;
 }
 
-void rtc_pps_int()
+void rtc_pps_int() // not used yet, no rtc in system 
 {
   rtc_sec_cnt++;
   rtc_32768_cnt=0;
 }
 
-void rtc_32768_int()
+void rtc_32768_int() // not used yet, no rtc in system 
 {
   rtc_latest_micro=micros();
   rtc_32768_cnt++;
@@ -119,7 +106,7 @@ int initGPS()
   myGPS.sendCommand(PMTK_SET_NMEA_OUTPUT_ALLDATA); // all sentences
   // myGPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCONLY); // only the R sentence
   
-    // set up the GPS PPS interupt driver
+  // set up the GPS PPS interupt driver
   attachInterrupt(digitalPinToInterrupt(GPSPPSINT), pps_int, RISING);
   return(ST_AOK);
 }
@@ -268,6 +255,15 @@ int gpsProcess()
 void loop() 
 {
   interrupts(); // Make sure interrupts are on
+
+  myGPS.LOCUS_StartLogger();
+
+//  Serial.print("STARTING GPS LOGGING....");
+//  if (myGPS.LOCUS_StartLogger())
+//    Serial.println(" GPS Logging Started!");
+//  else
+//    Serial.println(" no response :(");
+//  delay(1000);
 
   // accept simple commands on serial input
   if (Serial.available()) // 'b' or 'B' toggles bluetooth output 's' or 'S' toggles serial output

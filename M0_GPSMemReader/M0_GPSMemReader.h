@@ -1,5 +1,5 @@
 #pragma once
-const char *version="M0_DiveLogger -> V2.1-20170104 ";
+const char *version="M0_GPSMemReader -> V1.0-20170106 ";
 
 #include <Adafruit_Sensor.h>
 #include <Adafruit_LSM9DS0.h>
