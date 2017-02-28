@@ -186,7 +186,7 @@ int gpsProcess()
       // Serial.print(sentence[4]); // uniquely identify what kind of NMEA sentance
       if (sentence[4] == 'R') {Serial.print("# R"); Serial.println(myGPS.satellites); }
     }
-    if (myGPS.fix && sentence[4] == 'R') // print only for "R" and we have a fix
+    // drm if (myGPS.fix && sentence[4] == 'R') // print only for "R" and we have a fix
     {
       // Format and print the parsed values
       digitalWrite(LED, HIGH);   // turn the LED on (HIGH is the voltage level)
@@ -310,10 +310,13 @@ void loop()
       }
 
   // Process GPS
-  char *sentence = myGPS.lastNMEA();
-  boolean gpsGo = /* myGPS.newNMEAreceived() && */ (lastGPSmillis + GPSmillis < millis()) && (sentence[4] == 'R'); // Messing with this compare drm 20161204
+  
+  boolean gpsGo = myGPS.newNMEAreceived();
+  char *sentence = myGPS.lastNMEA();/* && (lastGPSmillis + GPSmillis < millis()) && (sentence[4] == 'R') */ ; // Messing with this compare drm 20161204
+  gpsGo = gpsGo /* && (sentence[4] == 'R') */;
   if (gpsGo) 
   {
+    
     gpsProcess();
     printXY();
   }
