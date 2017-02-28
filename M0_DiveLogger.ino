@@ -147,7 +147,6 @@ void setup()
 }
 
 // Read the IMU sensor
-
 void nineDoFProcess(void)
 {
   lastNINEDoFmillis = millis();
