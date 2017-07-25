@@ -27,6 +27,7 @@
 Adafruit_GPS myGPS(&Serial1);                  // Ultimate GPS FeatherWing
 Adafruit_LSM9DS0 my9DOF = Adafruit_LSM9DS0();  // i2c 9DOF sensor
 Adafruit_BluefruitLE_SPI ble(BLUEFRUIT_SPI_CS, BLUEFRUIT_SPI_IRQ, BLUEFRUIT_SPI_RST); // Bluetooth LE
+#include "M0_Output_Procs.h"
 
 void pps_int()
 {
@@ -154,8 +155,6 @@ void nineDoFProcess(void)
   sensors_event_t accel, mag, gyro, temp; // all local, no global knowledge of 9 DoF
   my9DOF.getEvent(&accel, &mag, &gyro, &temp); 
   digitalWrite(LED, LOW);
-<<<<<<< HEAD
-=======
 
   // Write the data
   String out = String(OUT_SIZE);
@@ -192,7 +191,6 @@ void print_serial()
   if(serprt) Serial.print("s ");
   for(i=0; i<4; i++) if(serprt) Serial.print(s[i], HEX);
   if(serprt) Serial.println();
->>>>>>> parent of 5d34de3... Small Changes
 }
 
 void micro_clk_corr()

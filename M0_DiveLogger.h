@@ -3,13 +3,14 @@ const char *version="M0_DiveLogger -> V2.1-20170104 ";
 
 #include <Adafruit_Sensor.h>
 #include <Adafruit_LSM9DS0.h>
-#include <drmLib.h>
+
 #include <Adafruit_GPS.h>
 #include <Arduino.h>
 #include <SPI.h>
 #include <Adafruit_BLE.h>
 #include <Adafruit_BluefruitLE_SPI.h>
 #include <Adafruit_BluefruitLE_UART.h>
+#include <drmLib.h>
 
 #include "BluefruitConfig.h"
 
